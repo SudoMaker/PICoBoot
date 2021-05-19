@@ -21,10 +21,11 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 - Customizable OEM commands
 
 ## Usage
+### Installation
 - Flash the `.hex` file to your board using the MPLAB X IPE. (This is the only one we can use at this moment. One day we will get `openocd` to support PIC24!)
 - Usually, you just need to hold the user button and push the MCLR button to enter bootloader. However, depending on the board definition, some boards may have different ways for this.
 - Connect the board to your computer.
-- Use the `picoboot` utility to manipulate the device.
+- Use the [`picoboot` utility](https://github.com/SudoMaker/PICoBoot_Utility) to manipulate the device.
 
 
 ![Screenshot_20210519_203901](https://user-images.githubusercontent.com/34613827/118813974-41bda780-b8e2-11eb-9c12-2e6157f4c421.png)
@@ -62,6 +63,12 @@ Hey! It's 2021! use CMake!
 - Modify `PICoBoot_Board.*` source code files and `PICoBoot.ld` linker script, edit the board info, boot mode logic, button handling, flash offsets, init routines as you like. Ensure the bootloader is installed to the second page of flash.
 - Add the board info to `CMakeLists.txt`. The syntax is `picoboot_add_board(board_name chip_name heap_size)`.
 - You can use existing ones as examples.
+
+### User application (firmware) modification
+Only the linker script needs to be modified.
+- Change the start position of program data to the address of the next page after last page used by bootloader
+- Decrease the program data length by minus it with the size of pages used by bootloader
+- That's all!
 
 ## How to help this project
 - Code improvements, of cource
