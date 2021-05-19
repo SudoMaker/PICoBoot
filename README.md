@@ -5,7 +5,7 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 ## Features
 ### Community version
 
-- Supports all PIC24/dsPIC33 MCUs with a USB module 
+- Supports all PIC24/dsPIC33 MCUs with USB module 
 - No driver installation needed on modern host OS (Linux/macOS/Windows)
 - `fastboot` like command line tool, for quick integration into development workflows
 - Versatile protocol with strong integrity check
@@ -41,7 +41,7 @@ If you use PICoBoot in your project, feel free to expand this list!
 
 
 ## Development
-Hey! It's 2021! use CMake!
+Hey! It's 2021! Use CMake!
 
 ### Build requirements
 - XC16 1.70+
