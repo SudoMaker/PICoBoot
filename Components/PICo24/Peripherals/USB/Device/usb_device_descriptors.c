@@ -167,36 +167,41 @@ USB_DEVICE_DESCRIPTOR device_dsc=
 
 
 //Language code string descriptor
-const struct{uint8_t bLength;uint8_t bDscType;uint16_t string[1];}sd000={
-	sizeof(sd000),USB_DESCRIPTOR_STRING,{0x0409}};
+const struct {
+	uint8_t bLength;
+	uint8_t bDscType;
+	uint16_t string[1];
+} sd000 = {sizeof(sd000),USB_DESCRIPTOR_STRING,{0x0409}};
 
 //Manufacturer string descriptor
-const struct{uint8_t bLength;uint8_t bDscType;uint16_t string[12];}sd001={
-	sizeof(sd001),USB_DESCRIPTOR_STRING,
-	{'S', 'u', 'd', 'o', 'M', 'a', 'k', 'e', 'r'}
-};
+const struct {
+	uint8_t bLength;
+	uint8_t bDscType;
+	uint16_t string[9];
+} sd001 = {sizeof(sd001), USB_DESCRIPTOR_STRING, {'S', 'u', 'd', 'o', 'M', 'a', 'k', 'e', 'r'}};
 
 //Product string descriptor
-const struct{uint8_t bLength;uint8_t bDscType;uint16_t string[32];}sd002={
-	sizeof(sd002),USB_DESCRIPTOR_STRING,
-	{'P','I','C','o','B', 'o', 'o', 't', ' ', 'L', 'o', 'a', 'd', 'e', 'r'}
-};
+const struct {
+	uint8_t bLength;
+	uint8_t bDscType;
+	uint16_t string[15];
+} sd002 = {sizeof(sd002), USB_DESCRIPTOR_STRING, {'P','I','C','o','B', 'o', 'o', 't', ' ', 'L', 'o', 'a', 'd', 'e', 'r'}};
 
-const struct{uint8_t bLength;uint8_t bDscType;uint16_t string[12];}sd003={
-	sizeof(sd003),USB_DESCRIPTOR_STRING,
-	{'0','0','0','0','0','0','0','0','0','0','0','0'}};
+const struct {
+	uint8_t bLength;
+	uint8_t bDscType;
+	uint16_t string[1];
+} sd003 = {sizeof(sd003), USB_DESCRIPTOR_STRING, {'0'}};
 
 //Array of configuration descriptors
-const uint8_t *const USB_CD_Ptr[]=
-	{
+const uint8_t *const USB_CD_Ptr[] = {
 		(const uint8_t *const)&usb_device_desc_ctx.raw
-	};
+};
 
 //Array of string descriptors
-const uint8_t *const USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS]=
-	{
+const uint8_t *const USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS] = {
 		(const uint8_t *const)&sd000,
 		(const uint8_t *const)&sd001,
 		(const uint8_t *const)&sd002,
 		(const uint8_t *const)&sd003
-	};
+};
