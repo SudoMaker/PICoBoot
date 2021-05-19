@@ -35,7 +35,7 @@ int main() {
 	PICoBoot_Board_PinInitialize();
 
 	if (RCONbits.POR) {
-		RCONbits. = 0;
+		RCONbits.POR = 0;
 	} else {
 		PICoBoot_RuntimeEnvironment_Load();
 
