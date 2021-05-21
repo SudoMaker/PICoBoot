@@ -32,7 +32,7 @@ void USBDeluxe_Tasks() {
 
 void USBDeluxe_SetRole(uint8_t role) {
 	if (usb_deluxe_role != role) {
-		USBDisableInterrupts();;
+		USBDisableInterrupts();
 		if (role == USB_ROLE_DEVICE) {
 			USBDeviceInit();
 			USBDeviceAttach();

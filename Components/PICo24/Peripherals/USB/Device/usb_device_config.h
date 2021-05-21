@@ -75,7 +75,7 @@
 //(ex: USBDeviceTasks()) must be called periodically by the application firmware
 //at a minimum rate as described in the inline code comments in usb_device.c.
 //------------------------------------------------------
-#define USB_INTERRUPT
+#define USB_POLLING
 //------------------------------------------------------------------------------
 
 /* Parameter definitions are defined in usb_device.h */
