@@ -29,7 +29,7 @@
 // CONFIG2
 #pragma config POSCMOD = XT    //Primary Oscillator Select->XT oscillator mode selected
 #pragma config DISUVREG = OFF    //Internal USB 3.3V Regulator Disable bit->Regulator is disabled
-#pragma config IOL1WAY = ON    //IOLOCK One-Way Set Enable bit->Write RP Registers Once
+#pragma config IOL1WAY = OFF    //IOLOCK One-Way Set Enable bit->Write RP Registers Once
 #pragma config OSCIOFNC = ON    //Primary Oscillator Output Function->OSCO functions as port I/O (RC15)
 #pragma config FCKSM = CSECMD    //Clock Switching and Monitor->Clock switching is enabled, Fail-safe Clock Monitor is disabled
 #pragma config FNOSC = FRC    //Oscillator Select->FRC
@@ -42,7 +42,7 @@
 #pragma config FWPSA = PR128    //WDT Prescaler->Prescaler ratio of 1:128
 #pragma config WINDIS = OFF    //Watchdog Timer Window->Standard Watchdog Timer enabled,(Windowed-mode is disabled)
 #pragma config FWDTEN = OFF    //Watchdog Timer Enable->Watchdog Timer is disabled
-#pragma config ICS = PGx1    //Comm Channel Select->Emulator functions are shared with PGEC1/PGED1
+#pragma config ICS = PGx2    //Comm Channel Select->Emulator functions are shared with PGEC1/PGED1
 #pragma config BKBUG = OFF    //Background Debug->Device resets into Operational mode
 #pragma config GWRP = OFF    //General Code Segment Write Protect->Writes to program memory are allowed
 #pragma config GCP = OFF    //General Code Segment Code Protect->Code protection is disabled
@@ -52,7 +52,7 @@ const uint32_t XTAL_FREQ = 32000000UL;
 const uint32_t FCY = 32000000UL / 2;
 
 const char PICoBoot_BoardManufacturer[] = "SudoMaker";
-const char PICoBoot_Board[] = "CartBoy RW v1";
+const char PICoBoot_Board[] = "CartBoy RW v2";
 const char PICoBoot_ChipManufacturer[] = "Microchip";
 const char PICoBoot_Chip[] = "PIC24FJ256GB108";
 
@@ -108,7 +108,10 @@ void PICoBoot_Board_PinInitialize() {
 	CNPD3 = 0x0000;
 	CNPD4 = 0x0000;
 	CNPD5 = 0x0000;
+
 	CNPU1 = 0x0000;
+	CNPU1bits.CN2PUE = 1;
+
 	CNPU2 = 0x0000;
 	CNPU3 = 0x0000;
 	CNPU4 = 0x0000;
@@ -152,6 +155,13 @@ void PICoBoot_Board_SystemInitialize() {
 	// CF no clock failure; NOSC PRIPLL; SOSCEN disabled; POSCEN disabled; CLKLOCK unlocked; OSWEN Switch is Complete;
 	__builtin_write_OSCCONH((uint8_t) (0x03));
 	__builtin_write_OSCCONL((uint8_t) (0x01));
+
+	// Important: Make use of the DefaultValues so it will not be LTO'd
+	for (size_t i=0; i<sizeof(PICoBoot_StaticEnvironment_DefaultValues); i++) {
+		PICoBoot_LED_1 = PICoBoot_StaticEnvironment_DefaultValues[i];
+		PICoBoot_LED_1 = 0;
+	}
+
 	// Wait for Clock switch to occur
 	while (OSCCONbits.OSWEN != 0);
 	while (OSCCONbits.LOCK != 1);
@@ -171,7 +181,7 @@ int PICoBoot_Board_Reset_Action() {
 		}
 	}
 
-	if (PORTDbits.RD7 == 1) {
+	if (PORTBbits.RB0 == 1) {
 		return ResetAction_RunUserApp;
 	} else {
 		return ResetAction_StayInBL;

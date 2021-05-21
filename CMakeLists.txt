@@ -31,4 +31,4 @@ endfunction()
 
 
 picoboot_add_board(PotatoPi_PICo24 24FJ256GB206 16384)
-picoboot_add_board(CartBoy_RW_v1 24FJ256GB108 1024)
+picoboot_add_board(CartBoy_RW_v2 24FJ256GB108 1024)

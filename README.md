@@ -23,7 +23,7 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 ## Usage
 ### Installation
 - Flash the `.hex` file to your board using the MPLAB X IPE. (This is the only one we can use at this moment. One day we will get `openocd` to support PIC24!)
-- Usually, you just need to hold the user button and push the MCLR button to enter bootloader. However, depending on the board definition, some boards may have different ways for this.
+- Usually you just need to hold the user button and push the MCLR button to enter bootloader. However, depending on the board definition, some boards may have different ways for this.
 - Connect the board to your computer.
 - Use the [`picoboot` utility](https://github.com/SudoMaker/PICoBoot_Utility) to manipulate the device.
 
@@ -35,7 +35,7 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 |Board|MCU|Enter Bootloader|
 |---|---|---|
 |PotatoPi PICo24|PIC24FJ256GB206|Hold RD7 + MCLR|
-|CartBoy RW v1|PIC24FJ256GB108|TBD|
+|CartBoy RW v2|PIC24FJ256GB108|Software only|
 
 If you use PICoBoot in your project, feel free to expand this list!
 

@@ -29,8 +29,8 @@
 #define PICoBoot_ENVAR_TRUE		0x55555555
 #define PICoBoot_ENVAR_FALSE		0xaaaaaaaa
 
-#define PICoBoot_LED_1			LATFbits.LATF0
-#define PICoBoot_LED_2			LATFbits.LATF1
+#define PICoBoot_LED_1			LATBbits.LATB12
+#define PICoBoot_LED_2			LATBbits.LATB12
 
 extern const char PICoBoot_BoardManufacturer[];
 extern const char PICoBoot_Board[];
