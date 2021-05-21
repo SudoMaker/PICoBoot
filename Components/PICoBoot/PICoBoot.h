@@ -98,11 +98,63 @@ typedef struct {
 	uint8_t reboot_target;
 } PicoBootRuntimeEnvironment;
 
+typedef union {
+	uint8_t u8;
+	uint16_t u16;
+	uint32_t u32;
+	uint64_t u64;
+} VariantInt;
+
+typedef struct {
+	uint8_t current_command;
+	uint8_t variable_command_length;
+
+	uint8_t buffer[32];
+	uint8_t buffer_pos;
+
+	uint32_t current_address;
+	uint16_t current_length;
+
+	uint8_t read_command;
+
+} PICoBootProtocolContext;
+
+extern const char PICoBoot_Version[];
+extern const int8_t flasher_cmd_arg_length_table[];
+
 extern PicoBootStaticEnvironment picoboot_static_env;
 extern PicoBootStaticEnvironment picoboot_static_env_por;
 extern PicoBootRuntimeEnvironment picoboot_runtime_env;
 
-extern void PicoBoot_Tasks();
-extern void PicoBoot_CDC_ParseIncomingData(const uint8_t *buf, uint16_t len);
-extern void PicoBoot_StartUserApp(uint16_t addr);
+extern PICoBootProtocolContext protocol_ctx;
+
+// CRC
+extern uint8_t crc8(const uint8_t *data, size_t len);
+extern uint32_t crc32(uint8_t *data, uint16_t size);
+
+// FlashOps
+extern int PICoBoot_CheckProhibitedRange(uint32_t addr);
+extern void PICoBoot_FlashEraseRange(uint32_t addr, uint32_t len);
+extern uint8_t PICoBoot_FlashWriteRaw(uint32_t addr, const uint8_t *buf);
+extern uint8_t PICoBoot_FlashWrite(size_t len);
+
+// Environment
+extern void PICoBoot_StaticEnvironment_Checksum_Gen(PicoBootStaticEnvironment *env);
+extern int PICoBoot_StaticEnvironment_Checksum_Verify(PicoBootStaticEnvironment *env);
 extern void PICoBoot_StaticEnvironment_Load();
+extern int PICoBoot_StaticEnvironment_InRange(uint32_t addr);
+extern uint32_t PICoBoot_StaticEnvironment_GetWord(uint32_t offset);
+extern void PICoBoot_StaticEnvironment_Save();
+
+// Protocol
+extern int PICoBoot_CmdBuffer_Push(uint8_t data);
+extern void PICoBoot_CmdBuffer_Clear();
+extern void PICoBoot_CommandSendReturnData(uint8_t *arg, uint8_t arg_len);
+extern void PICoBoot_CommandInvoke(uint8_t cmd, uint8_t *arg, uint8_t arg_len);
+extern void PICoBoot_Protocol_DoReads();
+extern void PicoBoot_Protocol_ParseIncomingData(const uint8_t *buf, uint16_t len);
+
+// Main
+extern void PicoBoot_Tasks();
+extern void PicoBoot_StartUserApp(uint16_t addr);
+

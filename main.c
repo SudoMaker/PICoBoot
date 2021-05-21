@@ -22,7 +22,7 @@
 uint16_t CDC_RxDone(void *userp, uint8_t *buf, uint16_t len) {
 	LATFbits.LATF0 = 1;
 
-	PicoBoot_CDC_ParseIncomingData(buf, len);
+	PicoBoot_Protocol_ParseIncomingData(buf, len);
 
 	return len;
 }
@@ -30,6 +30,24 @@ uint16_t CDC_RxDone(void *userp, uint8_t *buf, uint16_t len) {
 USBDeluxeDevice_CDC_IOps cdc_iops = {
 	.RxDone = CDC_RxDone
 };
+
+void DataLedTask() {
+	static uint16_t osc_count = 0;
+
+	const static uint16_t osc1 = 111;
+	const static uint16_t osc2 = 112;
+
+	osc_count += 1;
+
+	if (osc_count > (osc1 * osc2 * 2 - 1)) {
+		osc_count = 0;
+	}
+
+	uint8_t osc1_on = (osc_count / osc1) % 2;
+	uint8_t osc2_on = (osc_count / osc2) % 2;
+
+	PICoBoot_LED_1 = (osc1_on ^ osc2_on);
+}
 
 int main() {
 	PICoBoot_Board_PinInitialize();
@@ -65,20 +83,12 @@ int main() {
 		USBDeluxe_Device_ConfigApply();
 		USBDeluxe_SetRole(USB_ROLE_DEVICE);
 
-		PICoBoot_LED_1 = 1;
-
-		uint32_t cnt = 0;
-
 		while (1) {
-			if (cnt % 32768 == 0) {
-				PICoBoot_LED_1 = !PICoBoot_LED_1;
-			}
-
 			PicoBoot_Tasks();
 			USBDeviceTasks();
 			USBDeluxe_Device_Tasks();
 
-			cnt++;
+			DataLedTask();
 		}
 	}
 
