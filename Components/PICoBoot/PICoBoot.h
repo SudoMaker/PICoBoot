@@ -88,6 +88,7 @@ typedef struct {
 	uint8_t _;
 	uint32_t allow_read, allow_write;
 	uint8_t app_name[16], app_version[8];
+	uint8_t serial[16];
 	uint32_t checksum;
 } __attribute__((packed)) PicoBootStaticEnvironment;
 

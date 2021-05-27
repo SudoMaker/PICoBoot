@@ -54,7 +54,7 @@ void PICoBoot_StaticEnvironment_Load() {
 		picoboot_static_env.allow_write = PICoBoot_ENVAR_TRUE;
 		picoboot_static_env.app_name[0] = 0;
 		picoboot_static_env.app_version[0] = 0;
-
+		memset(picoboot_static_env.serial, 0, sizeof(picoboot_static_env.serial));
 		PICoBoot_StaticEnvironment_Checksum_Gen(&picoboot_static_env);
 	}
 

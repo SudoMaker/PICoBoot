@@ -10,6 +10,7 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 - `fastboot` like command line tool, for quick integration into development workflows
 - Versatile protocol with strong integrity check
 - Non-volatile environment variable (like U-Boot)
+- Serial number support 
 - Read/Write inhibit, to prevent the firmware from being read out or overwritten
 - No interrupt proxying, keeps you fast in reacting to interrupts
 

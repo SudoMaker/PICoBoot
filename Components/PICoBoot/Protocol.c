@@ -93,6 +93,13 @@ void PICoBoot_CommandInvoke(uint8_t cmd, uint8_t *arg, uint8_t arg_len) {
 						rc = FlasherResult_EPERM;
 						goto error_envwrite;
 					}
+				} else if (addr_within_range(abs_addr, &picoboot_static_env.serial, 16)) {
+					for (size_t j=0; j<16; j++) {
+						if (picoboot_static_env_por.serial[j] != 0) {
+							rc = FlasherResult_EPERM;
+							goto error_envwrite;
+						}
+					}
 				}
 			} else { // Runtime
 				abs_addr = ((uint8_t *)&picoboot_runtime_env) + off;
