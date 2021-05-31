@@ -60,7 +60,7 @@ const char PICoBoot_Chip[] = "PIC24FJ256GB108";
 
 const uint32_t PICoBoot_Bootloader_Address = 0x0400;
 const uint32_t PICoBoot_App_Address = 0x4000;
-const uint32_t PICoBoot_App_Size = 0x26bf8;
+const uint32_t PICoBoot_App_Size = 0x26000;
 const uint32_t PICoBoot_StaticEnvironment_Address = StaticEnvironment_Address;
 
 const uint16_t PICoBoot_Flash_PageSize = 1024;
