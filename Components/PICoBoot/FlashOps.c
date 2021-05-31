@@ -96,9 +96,11 @@ uint8_t PICoBoot_FlashWriteRaw(uint32_t addr, const uint8_t *buf) {
 				return FlasherResult_Verify_Error;
 			}
 		}
-	}
 
-	return FlasherResult_OK;
+		return FlasherResult_OK;
+	} else {
+		return FlasherResult_ERANGE;
+	}
 }
 
 uint8_t PICoBoot_FlashWrite(size_t len) {
@@ -110,13 +112,14 @@ uint8_t PICoBoot_FlashWrite(size_t len) {
 		return FlasherResult_CRC_Error;
 	}
 
+	uint8_t rc = FlasherResult_OK;
 	for (size_t i=0; i<len; i+=4) {
-		uint8_t rc = PICoBoot_FlashWriteRaw(protocol_ctx.current_address, protocol_ctx.buffer+i);
-		if (rc != FlasherResult_OK) {
+		rc = PICoBoot_FlashWriteRaw(protocol_ctx.current_address, protocol_ctx.buffer+i);
+		if (rc != FlasherResult_OK && rc != FlasherResult_ERANGE) {
 			return rc;
 		}
 		protocol_ctx.current_address += 2;
 	}
 
-	return FlasherResult_OK;
+	return rc;
 }
