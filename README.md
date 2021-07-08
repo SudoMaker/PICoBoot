@@ -33,10 +33,14 @@ Supercharged USB bootloader for various PIC24/dsPIC33 MCUs.
 
 
 ## Supported boards / products
-|Board|MCU|Enter Bootloader|
-|---|---|---|
-|PotatoPi PICo24|PIC24FJ256GB206|Hold RD7 + MCLR|
-|CartBoy RW v2|PIC24FJ256GB108|Software only|
+The units are the weird 3-byte `word` as mentioned in MCHP's datasheets.
+
+
+|Board|MCU|BL Addr|BL Region Size|App Addr|App Region Size|Enter Bootloader|
+|---|---|---|---|---|---|---|
+|PotatoPi PICo24|PIC24FJ256GB206|0x0400|0x3600|0x4000|0x26000|Hold RD7 + MCLR|
+|PotatoChip PICo24|PIC24FJ64GB002|0x0400|0x2000|0x2400|0x8400|Hold RB7 + MCLR|
+|CartBoy RW v2|PIC24FJ256GB108|0x0400|0x3600|0x4000|0x26000|Software only|
 
 If you use PICoBoot in your project, feel free to expand this list!
 
