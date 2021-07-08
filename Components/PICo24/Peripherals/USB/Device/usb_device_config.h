@@ -135,49 +135,16 @@
 
 #define USB_NUM_STRING_DESCRIPTORS 4  //Set this number to match the total number of string descriptors that are implemented in the usb_descriptors.c file
 
-/*******************************************************************
- * Event disable options                                           
- *   Enable a definition to suppress a specific event.  By default 
- *   all events are sent.                                          
- *******************************************************************/
-//#define USB_DISABLE_SUSPEND_HANDLER
-//#define USB_DISABLE_WAKEUP_FROM_SUSPEND_HANDLER
-//#define USB_DISABLE_SOF_HANDLER
-//#define USB_DISABLE_TRANSFER_TERMINATED_HANDLER
-//#define USB_DISABLE_ERROR_HANDLER 
-//#define USB_DISABLE_NONSTANDARD_EP0_REQUEST_HANDLER 
-//#define USB_DISABLE_SET_DESCRIPTOR_HANDLER 
-//#define USB_DISABLE_SET_CONFIGURATION_HANDLER
-//#define USB_DISABLE_TRANSFER_COMPLETE_HANDLER 
-
-
 /** DEVICE CLASS USAGE *********************************************/
 #define USB_USE_CDC
 
 /** ENDPOINTS ALLOCATION *******************************************/
 /* CDC */
-#define CDC_COMM_INTF_ID        usb_device_desc_ctx.cdc.iface_comm
-#define CDC_COMM_EP              usb_device_desc_ctx.cdc.ep_comm
+#define CDC_COMM_INTF_ID	0
+#define CDC_COMM_EP		1
 
-#define CDC_DATA_INTF_ID        usb_device_desc_ctx.cdc.iface_data
-#define CDC_DATA_EP             usb_device_desc_ctx.cdc.ep_data
-#define CDC_DATA_OUT_EP_SIZE    64
-
-
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1 //Set_Line_Coding, Set_Control_Line_State, Get_Line_Coding, and Serial_State commands
-//#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2 //Send_Break command
-
-/* MSD */
-#define MSD_INTF_ID             usb_device_desc_ctx.msd.iface
-
-//#define MAX_LUN                 0u       //Logical unit number count, starts from/includes '0' (ex: 0 == 1 LUN)
-#define MSD_DATA_IN_EP          usb_device_desc_ctx.msd.ep
-#define MSD_DATA_OUT_EP         usb_device_desc_ctx.msd.ep
-#define MSD_BUFFER_ADDRESS      0x600
-#define MEDIA_SECTOR_SIZE       512
-
-/** DEFINITIONS ****************************************************/
-
-/** DEFINITIONS ****************************************************/
+#define CDC_DATA_INTF_ID	1
+#define CDC_DATA_EP		2
+#define CDC_DATA_OUT_EP_SIZE	64
 
 #endif //USBCFG_H

@@ -29,5 +29,5 @@
 extern const uint32_t XTAL_FREQ;
 extern const uint32_t FCY;
 
-extern void Delay_Milliseconds(uint64_t milliseconds);
-extern void Delay_Microseconds(uint64_t microseconds);
+extern void Delay_Milliseconds(uint16_t milliseconds);
+

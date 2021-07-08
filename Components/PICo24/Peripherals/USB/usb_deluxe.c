@@ -26,8 +26,12 @@
 USBDeluxe_Role usb_deluxe_role = USB_ROLE_NONE;
 
 void USBDeluxe_Tasks() {
-	if (usb_deluxe_role == USB_ROLE_DEVICE)
-		USBDeluxe_Device_Tasks();
+
+}
+
+void USBDeluxe_Init() {
+	USBDeviceInit();
+	USBDeviceAttach();
 }
 
 void USBDeluxe_SetRole(uint8_t role) {
@@ -39,14 +43,5 @@ void USBDeluxe_SetRole(uint8_t role) {
 		}
 		usb_deluxe_role = role;
 		USBEnableInterrupts();
-	}
-}
-
-void __attribute__((interrupt,auto_psv)) _USB1Interrupt() {
-	if (usb_deluxe_role == USB_ROLE_DEVICE)
-		USBDeviceTasks();
-	else {
-		USBClearUSBInterrupt();
-		USBDisableInterrupts();
 	}
 }

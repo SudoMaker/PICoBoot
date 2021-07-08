@@ -29,22 +29,26 @@ int PICoBoot_CheckProhibitedRange(uint32_t addr) {
 	return 0;
 }
 
+void PICoBoot_Board_Flash_SafeErase(uint32_t addr) {
+	// Erase it first
+	PICoBoot_Board_Flash_ErasePage(addr);
+
+	// Rewrite reset vector on 0x0
+	if (addr == 0) {
+		// GOTO at 0x0
+		PICoBoot_Board_Flash_WriteInstruction(addr, 0x00040000 | PICoBoot_Bootloader_Address);
+		// Reset address at 0x2
+		PICoBoot_Board_Flash_WriteInstruction(addr + 2, 0x00000000);
+	}
+}
+
 void PICoBoot_FlashEraseRange(uint32_t addr, uint32_t len) {
 	for (uint32_t i=0; i<len; i+=2) {
 		protocol_ctx.current_address = addr + i;
 
 		if (!PICoBoot_CheckProhibitedRange(protocol_ctx.current_address)) {
 			if (protocol_ctx.current_address % PICoBoot_Flash_PageSize == 0) { // On page boundary
-				// Erase it first
-				PICoBoot_Board_Flash_ErasePage(protocol_ctx.current_address);
-
-				// Rewrite reset vector on 0x0
-				if (protocol_ctx.current_address == 0) {
-					// GOTO at 0x0
-					PICoBoot_Board_Flash_WriteInstruction(protocol_ctx.current_address, 0x00040000 | PICoBoot_Bootloader_Address);
-					// Reset address at 0x2
-					PICoBoot_Board_Flash_WriteInstruction(protocol_ctx.current_address + 2, 0x00000000);
-				}
+				PICoBoot_Board_Flash_SafeErase(protocol_ctx.current_address);
 			}
 		}
 	}
@@ -55,16 +59,7 @@ void PICoBoot_FlashEraseRange(uint32_t addr, uint32_t len) {
 uint8_t PICoBoot_FlashWriteRaw(uint32_t addr, const uint8_t *buf) {
 	if (!PICoBoot_CheckProhibitedRange(addr)) {
 		if (addr % PICoBoot_Flash_PageSize == 0) { // On page boundary
-			// Erase it first
-			PICoBoot_Board_Flash_ErasePage(addr);
-
-			// Rewrite reset vector on 0x0
-			if (addr == 0) {
-				// GOTO at 0x0
-				PICoBoot_Board_Flash_WriteInstruction(addr, 0x00040000 | PICoBoot_Bootloader_Address);
-				// Reset address at 0x2
-				PICoBoot_Board_Flash_WriteInstruction(addr + 2, 0x00000000);
-			}
+			PICoBoot_Board_Flash_SafeErase(addr);
 
 			// Rewrite environment if needed
 			if ((addr / PICoBoot_Flash_PageSize) == (PICoBoot_StaticEnvironment_Address / PICoBoot_Flash_PageSize)) {
@@ -75,16 +70,8 @@ uint8_t PICoBoot_FlashWriteRaw(uint32_t addr, const uint8_t *buf) {
 			}
 		}
 
-		uint32_t val = 0;
-
-		if (addr == 0) {
-
-		} else if (addr == 2) {
-
-		} else if (PICoBoot_StaticEnvironment_InRange(addr)) {
-
-		} else {
-			val |= buf[0];
+		if (addr != 0 && addr != 2 && !PICoBoot_StaticEnvironment_InRange(addr)) {
+			uint32_t val = buf[0];
 			val |= ((uint32_t) buf[1]) << 8;
 			val |= ((uint32_t) buf[2]) << 16;
 			val |= ((uint32_t) buf[3]) << 24;

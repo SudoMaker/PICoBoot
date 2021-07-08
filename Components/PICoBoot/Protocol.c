@@ -19,6 +19,8 @@
 
 #include "PICoBoot.h"
 
+extern USBDeluxeDevice_CDCACMContext cdc_ctx;
+
 static int addr_within_range(void *src, void *dest, size_t dest_size) {
 	if (src >= dest && src < (dest+dest_size)) {
 		return 1;
@@ -38,13 +40,7 @@ void PICoBoot_CmdBuffer_Clear() {
 	protocol_ctx.current_command = 0;
 }
 
-void PICoBoot_CommandSendReturnData(uint8_t *arg, uint8_t arg_len) {
-	USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, arg, arg_len);
-}
-
 void PICoBoot_CommandInvoke(uint8_t cmd, uint8_t *arg, uint8_t arg_len) {
-	PICoBoot_LED_2 = 1;
-
 	VariantInt v;
 
 	if (arg_len <= 8)
@@ -122,11 +118,11 @@ void PICoBoot_CommandInvoke(uint8_t cmd, uint8_t *arg, uint8_t arg_len) {
 
 			*abs_addr = val;
 error_envwrite:
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
 			break;
 		case FlasherCommand_EnvironmentSave: {
-			uint8_t rc = 0;
+			uint8_t rc = FlasherResult_OK;
 
 			if (v.u8 & 0x1) { // Static
 				PICoBoot_StaticEnvironment_Save();
@@ -136,15 +132,16 @@ error_envwrite:
 				PICoBoot_RuntimeEnvironment_Save();
 			}
 
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
+			break;
 		case FlasherCommand_FlashSetAddr:
 			protocol_ctx.current_address = v.u32 / 2;
-			PICoBoot_CommandSendReturnData(arg, arg_len);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, arg, arg_len);
 			break;
 		case FlasherCommand_FlashSetLength:
 			protocol_ctx.current_length = v.u16;
-			PICoBoot_CommandSendReturnData(arg, arg_len);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, arg, arg_len);
 			break;
 		case FlasherCommand_FlashRead:
 			protocol_ctx.read_command = cmd;
@@ -172,31 +169,44 @@ error_envwrite:
 				asm("reset");
 			}
 error_flasherase:
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
 			break;
 		case FlasherCommand_FlashWrite4: {
 			uint8_t rc = PICoBoot_FlashWrite(4);
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
 			break;
 		case FlasherCommand_FlashWrite8: {
 			uint8_t rc = PICoBoot_FlashWrite(8);
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
 			break;
 		case FlasherCommand_FlashWrite16: {
 			uint8_t rc = PICoBoot_FlashWrite(16);
-			PICoBoot_CommandSendReturnData(&rc, 1);
+			USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, &rc, 1);
 		}
 			break;
 		default:
 			break;
 	}
-
-	PICoBoot_LED_2 = 0;
 }
 
+void PICoBoot_Protocol_SendString(const char *str) {
+	USBDeluxeDevice_CDC_UserBuffer user_buf;
+
+	if (USBDeluxeDevice_CDC_ACM_AcquireTxBuffer(&cdc_ctx, &user_buf) == 0) {
+		*user_buf.buf_len = 32;
+
+		for (size_t i=0; i<32; i++) {
+			user_buf.buf[i] = str[i];
+			if (str[i] == 0)
+				break;
+		}
+	}
+
+	protocol_ctx.read_command = 0;
+}
 
 void PICoBoot_Protocol_DoReads() {
 	if (!protocol_ctx.read_command)
@@ -205,50 +215,41 @@ void PICoBoot_Protocol_DoReads() {
 	PICoBoot_LED_2 = 1;
 
 	switch (protocol_ctx.read_command) {
-		case FlasherCommand_GetBootloaderVersion: {
-			char name[32];
-			strncpy(name, PICoBoot_Version, 31);
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)name, sizeof(name));
-			protocol_ctx.read_command = 0;
-		}
+		case FlasherCommand_GetBootloaderVersion:
+			PICoBoot_Protocol_SendString(PICoBoot_Version);
 			break;
-		case FlasherCommand_GetBoardName: {
-			char name[32];
-			strncpy(name, PICoBoot_Board, 31);
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)name, sizeof(name));
-			protocol_ctx.read_command = 0;
-		}
+		case FlasherCommand_GetBoardName:
+			PICoBoot_Protocol_SendString(PICoBoot_Board);
 			break;
-		case FlasherCommand_GetBoardManufacturer: {
-			char name[32];
-			strncpy(name, PICoBoot_BoardManufacturer, 31);
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)name, sizeof(name));
-			protocol_ctx.read_command = 0;
-		}
+		case FlasherCommand_GetBoardManufacturer:
+			PICoBoot_Protocol_SendString(PICoBoot_BoardManufacturer);
 			break;
-		case FlasherCommand_GetChipName: {
-			char name[32];
-			strncpy(name, PICoBoot_Chip, 31);
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)name, sizeof(name));
-			protocol_ctx.read_command = 0;
-		}
+		case FlasherCommand_GetChipName:
+			PICoBoot_Protocol_SendString(PICoBoot_Chip);
 			break;
-		case FlasherCommand_GetChipManufacturer: {
-			char name[32];
-			strncpy(name, PICoBoot_ChipManufacturer, 31);
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)name, sizeof(name));
-			protocol_ctx.read_command = 0;
-		}
+		case FlasherCommand_GetChipManufacturer:
+			PICoBoot_Protocol_SendString(PICoBoot_ChipManufacturer);
 			break;
 		case FlasherCommand_EnvironmentRead: {
-			char env[64];
-			if (protocol_ctx.buffer[0] == 0) {
-				memcpy(env, &picoboot_static_env, sizeof(PicoBootStaticEnvironment));
+			static char env[64];
+
+			// TODO
+			if (protocol_ctx.current_length == 0) {
+				memset(env, 0, sizeof(env));
+
+				if (protocol_ctx.buffer[0] == 0) {
+					memcpy(env, &picoboot_static_env, sizeof(PicoBootStaticEnvironment));
+				} else {
+					memcpy(env, &picoboot_runtime_env, sizeof(PicoBootRuntimeEnvironment));
+				}
+
+				protocol_ctx.current_length = 32;
+				USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, (uint8_t *)env, 32);
 			} else {
-				memcpy(env, &picoboot_runtime_env, sizeof(PicoBootRuntimeEnvironment));
+				USBDeluxeDevice_CDC_ACM_Write(&cdc_ctx, (uint8_t *)env + 32, 32);
+				protocol_ctx.current_length = 0;
+				protocol_ctx.read_command = 0;
 			}
-			USBDeluxeDevice_CDC_Write(&USBDeluxe_DeviceGetDriverContext(0)->cdc, (uint8_t *)env, sizeof(env));
-			protocol_ctx.read_command = 0;
 		}
 			break;
 		case FlasherCommand_FlashRead: {
@@ -259,7 +260,7 @@ void PICoBoot_Protocol_DoReads() {
 
 			USBDeluxeDevice_CDC_UserBuffer user_buf;
 
-			if (USBDeluxeDevice_CDC_AcquireTxBuffer(&USBDeluxe_DeviceGetDriverContext(0)->cdc, &user_buf) == 0) {
+			if (USBDeluxeDevice_CDC_ACM_AcquireTxBuffer(&cdc_ctx, &user_buf) == 0) {
 				for (uint32_t j = 0; j < proc_len; j+=4) {
 					if (PICoBoot_CheckProhibitedRange(protocol_ctx.current_address) || picoboot_static_env_por.allow_read != PICoBoot_ENVAR_TRUE) {
 						user_buf.buf[j] = 'c';
@@ -300,6 +301,7 @@ void PicoBoot_Protocol_ParseIncomingData(const uint8_t *buf, uint16_t len) {
 	for (uint16_t i=0; i<len; i++) {
 		uint8_t cur_byte = buf[i];
 
+		PICoBoot_LED_2 = 1;
 		if (!protocol_ctx.current_command) {
 			if (flasher_cmd_arg_length_table[cur_byte] == 0) {
 				PICoBoot_CommandInvoke(cur_byte, NULL, 0);
@@ -314,6 +316,8 @@ void PicoBoot_Protocol_ParseIncomingData(const uint8_t *buf, uint16_t len) {
 				PICoBoot_CmdBuffer_Clear();
 			}
 		}
+
+		PICoBoot_LED_2 = 0;
 	}
 }
 

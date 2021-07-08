@@ -21,20 +21,8 @@
 
 #include <stdint.h>
 
-void Delay_Milliseconds(uint64_t milliseconds) {
+void Delay_Milliseconds(uint16_t milliseconds) {
     while (milliseconds--) {
-	    __delay32(FCY / 1000);
-    }
-}
-
-void Delay_Microseconds(uint64_t microseconds) {
-    while (microseconds >= 32) {
-	    __delay32(FCY / 1000000 * 32);
-
-	    microseconds -= 32;
-    }
-    
-    while (microseconds--) {
-	    __delay32(FCY / 1000000);
+	    __delay32(16000);
     }
 }

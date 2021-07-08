@@ -15,14 +15,31 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
 
-/* This file contains code originally written by Microchip Technology Inc., which was licensed under the Apache License. */
+
+    This file incorporates work covered by the following copyright and
+    permission notice:
+
+    Copyright 2015 Microchip Technology Inc. (www.microchip.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
 
 #pragma once
 
 #include <stdint.h>
 
+#define ssize_t int16_t
 
 /** D E F I N I T I O N S ****************************************************/
 
@@ -48,7 +65,6 @@
 #define RESPONSE_AVAILABLE          0x01
 #define SERIAL_STATE                0x20
 
-
 /* Device Class Code */
 #define CDC_DEVICE                  0x02
 
@@ -60,7 +76,6 @@
 
 /* Communication Interface Class Control Protocol Codes */
 #define V25TER                      0x01    // Common AT commands ("Hayes(TM)")
-
 
 /* Data Interface Class Codes */
 #define DATA_INTF                   0x0A
@@ -91,61 +106,10 @@
 #define DSC_FN_USB_TERMINAL         0x09
 /* more.... see Table 25 in USB CDC Specification 1.1 */
 
-/* CDC Bulk IN transfer states */
-#define CDC_TX_READY                0
-#define CDC_TX_BUSY                 1
-#define CDC_TX_BUSY_ZLP             2       // ZLP: Zero Length Packet
-#define CDC_TX_COMPLETING           3
-
 #define LINE_CODING_LENGTH          0x07
 
-#if defined(USB_CDC_SET_LINE_CODING_HANDLER)
-#define LINE_CODING_TARGET &cdc_notice.SetLineCoding._byte[0]
-    #define LINE_CODING_PFUNC &USB_CDC_SET_LINE_CODING_HANDLER
-#else
-#define LINE_CODING_TARGET &cdc_ctx->line_coding._byte[0]
-#define LINE_CODING_PFUNC NULL
-#endif
 
-#if defined(USB_CDC_SUPPORT_HARDWARE_FLOW_CONTROL)
-#define CONFIGURE_RTS(a) UART_RTS = a;
-#else
-#define CONFIGURE_RTS(a)
-#endif
-
-#if defined(USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D3)
-#error This option is not currently supported.
-#else
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D3_VAL 0x00
-#endif
-
-#if defined(USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2)
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2_VAL 0x04
-#else
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2_VAL 0x00
-#endif
-
-#if defined(USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1)
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1_VAL 0x02
-#else
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1_VAL 0x00
-#endif
-
-#if defined(USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D0)
-#error This option is not currently supported.
-#else
-#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D0_VAL 0x00
-#endif
-
-#define USB_CDC_ACM_FN_DSC_VAL  \
-    USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D3_VAL |\
-    USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2_VAL |\
-    USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1_VAL |\
-    USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D0_VAL
-
-
-
-#define USBDeluxe_CDC_BUF_SIZE			256
+#define USBDeluxe_CDC_BUF_SIZE			64
 #define USBDeluxe_CDC_PKT_SIZE			64
 
 
@@ -204,48 +168,56 @@ typedef struct {
 } USBDeluxeDevice_CDC_SERIAL_STATE_NOTIFICATION;
 
 typedef struct {
-	uint16_t (*RxDone)(void *userp, uint8_t *buf, uint16_t len);
+	void (*RxDone)(void *userp, uint8_t *buf, uint16_t len);
 	void (*TxDone)(void *userp);
-} USBDeluxeDevice_CDC_IOps;
+
+	void (*SetLineCoding)(void *userp, USBDeluxeDevice_CDC_LINE_CODING *line_coding);
+	void (*SetControlLineState)(void *userp, USBDeluxeDevice_CDC_CONTROL_SIGNAL_BITMAP *cs);
+
+} USBDeluxeDevice_CDC_ACM_IOps;
 
 typedef struct {
 	uint8_t *buf;
-	uint16_t *buf_len;
+	uint8_t *buf_len;
+	uint8_t *buf_pos;
 } USBDeluxeDevice_CDC_UserBuffer;
 
 typedef struct {
-	USBDeluxeDevice_CDC_IOBuffer rx_buf;
-	uint16_t rx_buf_pos;
+	USBDeluxeDevice_CDC_IOBuffer rx_buf[2];
+	uint8_t rx_buf_len[2];
+	uint8_t rx_buf_pos[2];
 
 	USBDeluxeDevice_CDC_IOBuffer tx_buf[2];
-	uint16_t tx_buf_len[2];
-	uint8_t tx_buf_idx;
+	uint8_t tx_buf_len[2];
 
-	uint8_t *tx_target;
-	uint16_t tx_target_len, tx_target_pos;
+	uint8_t rx_buf_idx;
+	uint8_t tx_buf_idx;
 
 	void *userp;
 
-	USBDeluxeDevice_CDC_IOps io_ops;
+	USBDeluxeDevice_CDC_ACM_IOps io_ops;
 
 	uint8_t USB_IFACE_COMM, USB_IFACE_DATA;
 	uint8_t USB_EP_COMM, USB_EP_DATA;
 
-	USBDeluxeDevice_CDC_LINE_CODING line_coding;    // Buffer to store line coding information
-	USBDeluxeDevice_CDC_NOTICE cdc_notice;
+	USBDeluxeDevice_CDC_LINE_CODING line_coding;
 	USBDeluxeDevice_CDC_CONTROL_SIGNAL_BITMAP control_signal_bitmap;
-
-	uint8_t cdc_trf_state;         // States are defined cdc.h
 
 	void *CDCDataOutHandle;
 	void *CDCDataInHandle;
 
-} USBDeluxeDevice_CDCContext;
+	uint8_t rx_queue_pending, rx_queue_pending_idx;
+} USBDeluxeDevice_CDCACMContext;
 
-extern void USBDeluxeDevice_CDC_Create(USBDeluxeDevice_CDCContext *cdc_ctx, void *userp, uint8_t usb_iface_comm, uint8_t usb_iface_data,
-				       uint8_t usb_ep_comm, uint8_t usb_ep_data, USBDeluxeDevice_CDC_IOps *io_ops);
-extern void USBDeluxeDevice_CDC_Init(USBDeluxeDevice_CDCContext *cdc_ctx);
-extern void USBDeluxeDevice_CDC_CheckRequest(USBDeluxeDevice_CDCContext *cdc_ctx);
-extern void USBDeluxeDevice_CDC_Tasks(USBDeluxeDevice_CDCContext *cdc_ctx);
-extern int USBDeluxeDevice_CDC_AcquireTxBuffer(USBDeluxeDevice_CDCContext *cdc_ctx, USBDeluxeDevice_CDC_UserBuffer *user_buf);
-extern int USBDeluxeDevice_CDC_Write(USBDeluxeDevice_CDCContext *cdc_ctx, uint8_t *buf, uint16_t len);
+extern void USBDeluxeDevice_CDC_ACM_Create(USBDeluxeDevice_CDCACMContext *cdc_ctx, void *userp, uint8_t usb_iface_comm, uint8_t usb_iface_data,
+					   uint8_t usb_ep_comm, uint8_t usb_ep_data, USBDeluxeDevice_CDC_ACM_IOps *io_ops);
+extern void USBDeluxeDevice_CDC_ACM_Init(USBDeluxeDevice_CDCACMContext *cdc_ctx);
+extern void USBDeluxeDevice_CDC_ACM_CheckRequest(USBDeluxeDevice_CDCACMContext *cdc_ctx);
+extern void USBDeluxeDevice_CDC_ACM_Tasks(USBDeluxeDevice_CDCACMContext *cdc_ctx);
+
+extern int USBDeluxeDevice_CDC_ACM_AcquireRxBuffer(USBDeluxeDevice_CDCACMContext *cdc_ctx, USBDeluxeDevice_CDC_UserBuffer *user_buf);
+extern void USBDeluxeDevice_CDC_ACM_AdvanceRxBuffer(USBDeluxeDevice_CDCACMContext *cdc_ctx);
+extern int USBDeluxeDevice_CDC_ACM_AcquireTxBuffer(USBDeluxeDevice_CDCACMContext *cdc_ctx, USBDeluxeDevice_CDC_UserBuffer *user_buf);
+
+extern ssize_t USBDeluxeDevice_CDC_ACM_Read(USBDeluxeDevice_CDCACMContext *cdc_ctx, uint8_t *buf, size_t len);
+extern ssize_t USBDeluxeDevice_CDC_ACM_Write(USBDeluxeDevice_CDCACMContext *cdc_ctx, uint8_t *buf, size_t len);

@@ -18,7 +18,3 @@
 */
 
 #include "Core.h"
-
-uint8_t PICo24_Discard8;
-uint16_t PICo24_Discard16;
-

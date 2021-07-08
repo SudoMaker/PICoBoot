@@ -6,7 +6,7 @@ include(CMake/FindXC16.cmake)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-add_compile_options(-g -O2 -std=c99)
+add_compile_options(-g -O1 -std=c99)
 
 include_directories(Components)
 file(GLOB_RECURSE PICo24_Core_SOURCES "Components/PICo24/*.*")
@@ -31,4 +31,5 @@ endfunction()
 
 
 picoboot_add_board(PotatoPi_PICo24 24FJ256GB206 16384)
+picoboot_add_board(PotatoChip_PICo24 24FJ64GB002 1024)
 picoboot_add_board(CartBoy_RW_v2 24FJ256GB108 1024)

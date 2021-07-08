@@ -19,15 +19,11 @@
 
 #include <PICoBoot/PICoBoot.h>
 
-uint16_t CDC_RxDone(void *userp, uint8_t *buf, uint16_t len) {
-	LATFbits.LATF0 = 1;
-
+void CDC_RxDone(void *userp, uint8_t *buf, uint16_t len) {
 	PicoBoot_Protocol_ParseIncomingData(buf, len);
-
-	return len;
 }
 
-USBDeluxeDevice_CDC_IOps cdc_iops = {
+USBDeluxeDevice_CDC_ACM_IOps cdc_iops = {
 	.RxDone = CDC_RxDone
 };
 
@@ -49,8 +45,11 @@ void DataLedTask() {
 	PICoBoot_LED_1 = (osc1_on ^ osc2_on);
 }
 
+USBDeluxeDevice_CDCACMContext cdc_ctx = {0};
+
 int main() {
 	PICoBoot_Board_PinInitialize();
+
 
 	if (RCONbits.POR) {
 		RCONbits.POR = 0;
@@ -78,13 +77,12 @@ int main() {
 	} else {
 		PICoBoot_Board_SystemInitialize();
 
-		USBDeluxe_Device_ConfigInit();
-		USBDeluxe_DeviceFunction_Add_CDC(NULL, &cdc_iops);
-		USBDeluxe_Device_ConfigApply();
-		USBDeluxe_SetRole(USB_ROLE_DEVICE);
+		USBDeluxeDevice_CDC_ACM_Create(&cdc_ctx, NULL, 0, 1, 1, 2, &cdc_iops);
+		USBDeluxe_Device_Init();
 
 		while (1) {
 			PicoBoot_Tasks();
+
 			USBDeviceTasks();
 			USBDeluxe_Device_Tasks();
 

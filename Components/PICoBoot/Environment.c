@@ -74,7 +74,7 @@ int PICoBoot_StaticEnvironment_InRange(uint32_t addr) {
 	}
 }
 
-uint32_t PICoBoot_StaticEnvironment_GetWord(uint32_t offset) {
+uint32_t PICoBoot_StaticEnvironment_GetWord(uint16_t offset) {
 	uint32_t val = 0;
 
 	uint8_t *p = ((uint8_t *)&picoboot_static_env) + offset;
@@ -86,9 +86,9 @@ uint32_t PICoBoot_StaticEnvironment_GetWord(uint32_t offset) {
 }
 
 void PICoBoot_StaticEnvironment_Save() {
-	uint32_t page = PICoBoot_StaticEnvironment_Address / PICoBoot_Flash_PageSize;
-	uint32_t pagesize_dwords = PICoBoot_Flash_PageSize / 2;
-	uint32_t page_address = page * PICoBoot_Flash_PageSize;
+//	uint16_t page = PICoBoot_StaticEnvironment_Address / PICoBoot_Flash_PageSize;
+	uint16_t pagesize_dwords = PICoBoot_Flash_PageSize / 2;
+	uint32_t page_address = PICoBoot_StaticEnvironment_Address / PICoBoot_Flash_PageSize * PICoBoot_Flash_PageSize;
 	protocol_ctx.current_address = page_address;
 
 	uint32_t page_contents[pagesize_dwords];

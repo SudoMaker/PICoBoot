@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 /* Functional Descriptor Structure - See CDC Specification 1.2 for details */
 
 /* Header Functional Descriptor */

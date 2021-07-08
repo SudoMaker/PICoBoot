@@ -22,6 +22,3 @@
 #include <stdint.h>
 
 #include "IDESupport.h"
-
-extern uint8_t PICo24_Discard8;
-extern uint16_t PICo24_Discard16;

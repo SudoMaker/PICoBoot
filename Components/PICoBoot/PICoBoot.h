@@ -144,13 +144,12 @@ extern void PICoBoot_StaticEnvironment_Checksum_Gen(PicoBootStaticEnvironment *e
 extern int PICoBoot_StaticEnvironment_Checksum_Verify(PicoBootStaticEnvironment *env);
 extern void PICoBoot_StaticEnvironment_Load();
 extern int PICoBoot_StaticEnvironment_InRange(uint32_t addr);
-extern uint32_t PICoBoot_StaticEnvironment_GetWord(uint32_t offset);
+extern uint32_t PICoBoot_StaticEnvironment_GetWord(uint16_t offset);
 extern void PICoBoot_StaticEnvironment_Save();
 
 // Protocol
 extern int PICoBoot_CmdBuffer_Push(uint8_t data);
 extern void PICoBoot_CmdBuffer_Clear();
-extern void PICoBoot_CommandSendReturnData(uint8_t *arg, uint8_t arg_len);
 extern void PICoBoot_CommandInvoke(uint8_t cmd, uint8_t *arg, uint8_t arg_len);
 extern void PICoBoot_Protocol_DoReads();
 extern void PicoBoot_Protocol_ParseIncomingData(const uint8_t *buf, uint16_t len);
